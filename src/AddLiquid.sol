@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./interfaces/IUniswapV2Pair.sol";
+import "forge-std/console.sol";
 
 contract AddLiquid {
     /**
@@ -12,14 +13,80 @@ contract AddLiquid {
      *  The challenge is to provide the same ratio as the pool then call the mint function in the pool contract.
      *
      */
-    function addLiquidity(address usdc, address weth, address pool, uint256 usdcReserve, uint256 wethReserve) public {
+    function addLiquidity(
+        address usdc,
+        address weth,
+        address pool,
+        uint256 usdcReserve,
+        uint256 wethReserve
+    ) public {
         IUniswapV2Pair pair = IUniswapV2Pair(pool);
 
         // your code start here
 
         // see available functions here: https://github.com/Uniswap/v2-core/blob/master/contracts/interfaces/IUniswapV2Pair.sol
+        // These values are passed in already
+        // (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast) = pair
+        //     .getReserves();
 
-        // pair.getReserves();
-        // pair.mint(...);
+        // Multiply pool balances by 10**36 to improve math logic.  Surely there's a better way?
+        uint usdcBalOurs = 1000 * 10 ** 6;
+        uint wethBalOurs = 1 ether;
+
+        /*
+        General math we want:
+        usdcDeposit / wethDeposit = usdcReserve / wethReserve
+        So:
+        usdcDeposit = (usdcReserve / wethReserve) * wethDeposit
+        wethDeposit = (wethReserve / usdcReserve ) * usdcDeposit
+
+        We can multiply numerator on right side by 10**32 to get more precision, then divide on the right to balance
+
+        But then unless pool ratio perfectly matches our ratio, one of the deposit amounts well be
+        greater than our balance, we can handle this by going with the smaller amount
+
+        Example:
+        usdcReserve = 47*10**6
+        wethReserve = 80*10**18
+        usdcBalOurs = 1000*10**6
+        wethBalOurs = 1*10**18
+        usdcDeposit = (usdcReserve * 10**32 / wethReserve) * wethBalOurs
+        wethDeposit = (wethReserve * 10**32 / usdcReserve ) * usdcBalOurs
+        usdcDeposit /= 10**32
+        wethDeposit /= 10**32
+        >>> usdcDeposit/usdcReserve
+        0.0125
+        >>> wethDeposit/wethReserve
+        21.27659574468085
+
+        # Because our wethDeposit amount is excessive, use the calculated
+        # usdcDeposit amount, and round wethDeposit down to wethBalOurs
+        */
+
+        uint usdcDeposit = ((usdcReserve * 10 ** 32) / wethReserve) *
+            wethBalOurs;
+        uint wethDeposit = ((wethReserve * 10 ** 32) / usdcReserve) *
+            usdcBalOurs;
+        usdcDeposit /= 10 ** 32;
+        wethDeposit /= 10 ** 32;
+        console.log("AMOUNTS", usdcDeposit, wethDeposit);
+        if (usdcDeposit > usdcBalOurs) {
+            usdcDeposit = usdcBalOurs;
+        } else if (wethDeposit > wethBalOurs) {
+            wethDeposit = wethBalOurs;
+        }
+        console.log("FINAL AMOUNTS", usdcDeposit, wethDeposit);
+        console.log("RESERVES", usdcReserve, wethReserve);
+
+        //  AMOUNTS 3445973281 290193776436411827
+        //  FINAL AMOUNTS 1000000000 290193776436411827
+        //  RESERVES 51547901263572 14958880135047243729741
+        //  7169800519523
+
+        IUniswapV2Pair(weth).transfer(pool, wethDeposit);
+        IUniswapV2Pair(usdc).transfer(pool, usdcDeposit);
+
+        address to = address(this);
+        pair.mint(to);
     }
 }

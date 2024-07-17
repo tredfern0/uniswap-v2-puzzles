@@ -24,5 +24,12 @@ contract ExactSwap {
          */
 
         // your code start here
+        uint amount0Out = 1337 * 10 ** 6;
+        uint amount1Out = 0;
+        address to = address(this);
+        // Do we not get refunded?  Getting error
+        // [FAIL. Reason: revert: Did Not Swap Exact Amount Of WETH.]
+        IERC20(weth).transfer(address(pool), 1 ether);
+        IUniswapV2Pair(pool).swap(amount0Out, amount1Out, to, "");
     }
 }

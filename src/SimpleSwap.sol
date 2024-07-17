@@ -24,5 +24,14 @@ contract SimpleSwap {
          */
 
         // your code start here
+        uint256 amount0Out = 100;
+        uint256 amount1Out = 0;
+        address to = address(this);
+        bytes memory data;
+
+        // Do we need to calculate exact amount?  Think we'll get refunded?
+        uint wethDeposit = 1 ether;
+        IUniswapV2Pair(weth).transfer(pool, wethDeposit);
+        IUniswapV2Pair(pool).swap(amount0Out, amount1Out, to, data);
     }
 }

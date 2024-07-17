@@ -17,8 +17,29 @@ contract ExactSwapWithRouter {
         router = _router;
     }
 
-    function performExactSwapWithRouter(address weth, address usdc, uint256 deadline) public {
+    function performExactSwapWithRouter(
+        address weth,
+        address usdc,
+        uint256 deadline
+    ) public {
         // your code start here
+        address[] memory path = new address[](2);
+        path[0] = weth;
+        path[1] = usdc;
+
+        uint amountInMax = IERC20(weth).balanceOf(address(this));
+        IERC20(weth).approve(router, amountInMax);
+
+        uint256 amountOut = 1337 * 10 ** 6;
+
+        address to = address(this);
+        IUniswapV2Router(router).swapTokensForExactTokens(
+            amountOut,
+            amountInMax,
+            path,
+            to,
+            deadline
+        );
     }
 }
 
@@ -37,4 +58,13 @@ interface IUniswapV2Router {
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts);
+
+    /////////////// Adding this function, think this is what we actually need?
+    function swapTokensForExactTokens(
+        uint amountOut,
+        uint amountInMax,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
 }
