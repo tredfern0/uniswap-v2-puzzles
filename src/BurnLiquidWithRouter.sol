@@ -32,6 +32,9 @@ contract BurnLiquidWithRouter {
         uint256 amountBMin = 0;
         address to = address(this);
 
+        uint256 ourLiq = IERC20(pool).balanceOf(address(this));
+        IERC20(pool).approve(router, ourLiq);
+
         IUniswapV2Router(router).removeLiquidity(
             tokenA,
             tokenB,

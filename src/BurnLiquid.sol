@@ -20,6 +20,10 @@ contract BurnLiquid {
          *     to: recipient address to receive tokenA and tokenB.
          */
         // your code here
+
+        // We have to send the LP tokens to the pool contract first
+        uint256 ourLiq = IUniswapV2Pair(pool).balanceOf(address(this));
+        IUniswapV2Pair(pool).transfer(pool, ourLiq);
         IUniswapV2Pair(pool).burn(address(this));
     }
 }
