@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import "./interfaces/IUniswapV2Pair.sol";
-import "forge-std/console.sol";
 
 contract AddLiquid {
     /**
@@ -69,24 +68,16 @@ contract AddLiquid {
             usdcBalOurs;
         usdcDeposit /= 10 ** 32;
         wethDeposit /= 10 ** 32;
-        console.log("AMOUNTS", usdcDeposit, wethDeposit);
         if (usdcDeposit > usdcBalOurs) {
             usdcDeposit = usdcBalOurs;
         } else if (wethDeposit > wethBalOurs) {
             wethDeposit = wethBalOurs;
         }
-        console.log("FINAL AMOUNTS", usdcDeposit, wethDeposit);
-        console.log("RESERVES", usdcReserve, wethReserve);
-
-        //  AMOUNTS 3445973281 290193776436411827
-        //  FINAL AMOUNTS 1000000000 290193776436411827
-        //  RESERVES 51547901263572 14958880135047243729741
-        //  7169800519523
 
         IUniswapV2Pair(weth).transfer(pool, wethDeposit);
         IUniswapV2Pair(usdc).transfer(pool, usdcDeposit);
 
-        address to = address(this);
+        address to = msg.sender;
         pair.mint(to);
     }
 }

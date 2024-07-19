@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
-
 import "./interfaces/IUniswapV2Pair.sol";
 
 contract AddLiquidWithRouter {
@@ -27,7 +26,7 @@ contract AddLiquidWithRouter {
         uint256 amountTokenDesired = 1000 * 10 ** 6;
         uint256 amountTokenMin = 0;
         uint256 amountETHMin = 0;
-        address to = address(this);
+        address to = msg.sender;
 
         // Have to let the router perform the transfer
         IUniswapV2Pair(usdcAddress).approve(router, amountTokenDesired);
