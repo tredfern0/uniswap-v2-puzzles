@@ -70,7 +70,7 @@ contract MyMevBot {
             deadline
         );
         // And we have to repay the flash loan plus fee!
-        IERC20(usdc).transfer(router, 1000 * 10 ** 6 + _fee0);
+        IERC20(usdc).transfer(address(flashLenderPool), 1000 * 10 ** 6 + _fee0);
     }
 
     function callMeCallMe() private {
