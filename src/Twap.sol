@@ -39,19 +39,21 @@ contract Twap {
     function first1HourSnapShot() public {
         // your code here
         first1HourSnapShot_Price0Cumulative = pool.price0CumulativeLast();
-        first1HourSnapShot_TimeStamp = uint32(block.timestamp);
+        // first1HourSnapShot_TimeStamp = uint32(block.timestamp);
+        (, , first1HourSnapShot_TimeStamp) = pool.getReserves();
     }
 
     function second1HourSnapShot() public returns (uint224 oneHourTwap) {
         // your code here
         second1HourSnapShot_Price0Cumulative = pool.price0CumulativeLast();
-        second1HourSnapShot_TimeStamp = uint32(block.timestamp);
+        (, , second1HourSnapShot_TimeStamp) = pool.getReserves();
+        // second1HourSnapShot_TimeStamp = uint32(block.timestamp);
 
         uint lookback = second1HourSnapShot_TimeStamp -
             first1HourSnapShot_TimeStamp;
         uint pricep = second1HourSnapShot_Price0Cumulative -
             first1HourSnapShot_Price0Cumulative;
-        oneHourTwap = uint224(lookback / pricep);
+        oneHourTwap = uint224(pricep / lookback);
         return oneHourTwap;
 
         // 1DayTWAP storage slots
@@ -62,20 +64,22 @@ contract Twap {
     function first1DaySnapShot() public {
         // your code here
         first1DaySnapShot_Price0Cumulative = pool.price0CumulativeLast();
-        first1DaySnapShot_TimeStamp = uint32(block.timestamp);
+        // first1DaySnapShot_TimeStamp = uint32(block.timestamp);
+        (, , first1DaySnapShot_TimeStamp) = pool.getReserves();
     }
 
     function second1DaySnapShot() public returns (uint224 oneDayTwap) {
         // your code here
 
         second1DaySnapShot_Price0Cumulative = pool.price0CumulativeLast();
-        second1DaySnapShot_TimeStamp = uint32(block.timestamp);
+        // second1DaySnapShot_TimeStamp = uint32(block.timestamp);
+        (, , second1DaySnapShot_TimeStamp) = pool.getReserves();
 
         uint lookback = second1DaySnapShot_TimeStamp -
             first1DaySnapShot_TimeStamp;
         uint pricep = second1DaySnapShot_Price0Cumulative -
             first1DaySnapShot_Price0Cumulative;
-        oneDayTwap = uint224(lookback / pricep);
+        oneDayTwap = uint224(pricep / lookback);
 
         return (oneDayTwap);
     }
